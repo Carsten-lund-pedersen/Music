@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Elleve originale godnatmelodier til børn på 3 til 7 år, der spilles direkte på siden.">
+<meta name="theme-color" content="#111330">
+<title>Godnatmusik</title>
+<style>
+  /* Layout: sød børnenat med tegnede figurer. Én kort pr. sang med figur, tekst og en stor Spil-knap. Fast afspillerlinje i bunden. */
+  :root {
+    --bg: #eceffa;
+    --glow: #dfe3ff;
+    --surface: #ffffff;
+    --surface-2: #e6e9f8;
+    --fg: #1f2347;
+    --muted: #4f5580;
+    --line: #d3d8f2;
+    --accent: #5a55d6;
+    --accent-ink: #ffffff;
+    --night: #000000;
+    --night-fg: #8ee6a0;
+    --ink: #4a4478;
+    --font-display: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111330; --glow: #23275e; --surface: #1b1e47; --surface-2: #2a2e66; --fg: #e9eafc;
+      --muted: #b3b7e0; --line: #363b82; --accent: #a7a6ff; --accent-ink: #14163a; --ink: #0b0c26;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111330; --glow: #23275e; --surface: #1b1e47; --surface-2: #2a2e66; --fg: #e9eafc;
+    --muted: #b3b7e0; --line: #363b82; --accent: #a7a6ff; --accent-ink: #14163a; --ink: #0b0c26;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: radial-gradient(60rem 28rem at 12% -6%, var(--glow), transparent 70%), var(--bg);
+    color: var(--fg);
+    font: 400 1.0625rem/1.65 var(--font-body);
+    padding-block: 2.5rem 10rem;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 62rem; margin: 0 auto; display: grid; gap: 2.5rem; }
+
+  header { display: grid; gap: 1rem; justify-items: start; }
+  .scene { position: relative; width: 9.5rem; height: 6.75rem; }
+  .hero { width: 6.5rem; height: 6.5rem; animation: bob 7s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-.3rem) rotate(-2deg); } }
+  .tw { position: absolute; width: 1.2rem; height: 1.2rem; animation: tw 3.2s ease-in-out infinite; }
+  .tw.a { left: 6.9rem; top: .2rem; }
+  .tw.b { left: 8.2rem; top: 3rem; width: .8rem; height: .8rem; animation-delay: 1s; }
+  .tw.c { left: 6.4rem; top: 5rem; width: 1rem; height: 1rem; animation-delay: 2s; }
+  @keyframes tw { 50% { opacity: .35; transform: scale(.75); } }
+  @media (prefers-reduced-motion: reduce) { .hero, .tw { animation: none; } }
+  h1 { font: 600 clamp(2.1rem, 6vw, 3.4rem)/1.1 var(--font-display); margin: 0; text-wrap: balance; }
+  .lede { margin: 0; max-width: 40rem; color: var(--muted); font-size: 1.15rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chip { font-size: .9rem; font-weight: 700; padding: .3rem .85rem; border-radius: 999px; background: var(--surface-2); }
+
+  .list { display: grid; gap: 1.1rem; padding: 0; margin: 0; list-style: none; }
+  .row {
+    display: grid; grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+    gap: 1.5rem; padding: 1.4rem;
+    background: var(--surface); border: 2px solid var(--line); border-radius: 1.9rem;
+  }
+  .row.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); }
+  .head { display: flex; gap: 1rem; align-items: center; min-width: 0; }
+  .art { flex: none; width: 5.25rem; height: 5.25rem; }
+  /* Kradset, håndtegnet look: vaklende streger og en skæv farveblyants-kontur */
+  .art, .hero, .tw { filter: url(#hand); }
+  .row:nth-child(odd) .art { transform: rotate(-4deg); }
+  .row:nth-child(even) .art { transform: rotate(3deg); }
+  .row h2 { font: 600 1.4rem/1.2 var(--font-display); margin: 0; text-wrap: balance; }
+  .piece { margin: .15rem 0 0; color: var(--muted); font-weight: 700; }
+  .body { display: grid; gap: .85rem; min-width: 0; align-content: start; }
+  .body p { margin: 0; max-width: 40rem; }
+  .tags { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tags li { background: var(--surface-2); border-radius: 999px; padding: .15rem .8rem; font-size: .92rem; font-weight: 600; }
+  .play {
+    justify-self: start; display: inline-flex; align-items: center; gap: .55rem;
+    padding: .65rem 1.4rem .65rem 1.1rem; border: 0; border-radius: 999px; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink); font: 600 1.1rem var(--font-display);
+  }
+  .play svg { width: 1.35rem; height: 1.35rem; fill: currentColor; }
+  .play .i-pause, .play .t-stop { display: none; }
+  .row.on .i-pause { display: block; }
+  .row.on .t-stop { display: inline; }
+  .row.on .i-play, .row.on .t-play { display: none; }
+  button:focus-visible, select:focus-visible, input:focus-visible, #night:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+
+  .credit { margin: 0; text-align: center; color: var(--muted); font: 600 1rem var(--font-display); }
+  .tips h2 { font: 600 1.55rem/1.2 var(--font-display); margin: 0 0 1rem; }
+  .tips ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .tips li { padding: .9rem 1rem; background: var(--surface); border: 2px solid var(--line); border-radius: 1.4rem; }
+  .tips strong { display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; margin-bottom: .2rem; }
+  .tips span { color: var(--muted); font-size: .98rem; }
+
+  .player {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: var(--surface); border-top: 2px solid var(--line); border-radius: 1.5rem 1.5rem 0 0;
+    padding-top: .85rem;
+    padding-bottom: calc(.85rem + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .player-in { max-width: 62rem; margin: 0 auto; display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; justify-content: space-between; }
+  .np { min-width: 0; }
+  .np b { display: block; font-family: var(--font-display); font-weight: 600; }
+  .np span { color: var(--muted); font-size: .95rem; font-variant-numeric: tabular-nums; }
+  .ctl { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: center; }
+  .ctl label { display: flex; align-items: center; gap: .5rem; font-size: .92rem; color: var(--muted); }
+  .ctl input[type=range] { width: 8rem; accent-color: var(--accent); }
+  select, .btn {
+    font: inherit; font-size: .95rem; color: var(--fg); background: var(--surface-2);
+    border: 2px solid var(--line); border-radius: 999px; padding: .3rem .85rem;
+  }
+  .btn { cursor: pointer; font-weight: 700; }
+  .btn.main { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  #night { position: fixed; inset: 0; z-index: 50; background: var(--night); color: var(--night-fg); display: grid; place-content: center; text-align: center; gap: .6rem; cursor: pointer; font-variant-numeric: tabular-nums; padding: 1rem; }
+  #night[hidden], .player[hidden] { display: none; }
+  #night b { font: 600 clamp(3rem, 16vw, 6rem)/1 var(--font-display); letter-spacing: .02em; }
+  #night small { font-size: 1.1rem; font-weight: 700; }
+  #night span { font-size: .95rem; opacity: .75; }
+
+  @media (max-width: 640px) {
+    .row { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 1.2rem; }
+    .ctl input[type=range] { width: 6rem; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="hand" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G" result="wob"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="1" seed="2" result="n2"/>
+    <feDisplacementMap in="SourceAlpha" in2="n2" scale="3" xChannelSelector="G" yChannelSelector="R" result="wob2"/>
+    <feMorphology in="wob2" operator="dilate" radius="1.2" result="fat"/>
+    <feFlood style="flood-color:var(--ink)" flood-opacity=".8"/>
+    <feComposite in2="fat" operator="in" result="line"/>
+    <feMerge><feMergeNode in="line"/><feMergeNode in="wob"/></feMerge>
+  </filter>
+  <symbol id="ico-play" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></symbol>
+  <symbol id="ico-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></symbol>
+  <symbol id="a-spark" viewBox="0 0 24 24"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z" fill="#ffd54f" stroke="#ffd54f" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+
+  <!-- Månen med nattue -->
+  <symbol id="a-moon" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#cfd6ff"/>
+    <path d="M17 28Q30 2 48 20Z" fill="#ff9fb2"/><circle cx="48" cy="19" r="4" fill="#fff"/>
+    <circle cx="32" cy="37" r="17" fill="#ffe08a"/>
+    <path d="M24 36q3 3 6 0M34 36q3 3 6 0M29 43q3 2.5 6 0" fill="none" stroke="#7a5c1e" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="22.5" cy="41" r="2.4" fill="#ffb3c1"/><circle cx="41.5" cy="41" r="2.4" fill="#ffb3c1"/>
+    <circle cx="10" cy="14" r="1.6" fill="#fff"/><circle cx="54" cy="46" r="1.6" fill="#fff"/><circle cx="12" cy="50" r="1.2" fill="#fff"/>
+  </symbol>
+  <!-- Sovende stjerne -->
+  <symbol id="a-star" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#ffe0f0"/>
+    <path d="M32 14L36.7 26.5L50.1 27.1L39.6 35.5L43.2 48.4L32 41L20.8 48.4L24.4 35.5L13.9 27.1L27.3 26.5Z" fill="#ffd54f" stroke="#ffd54f" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M27 33q2 2 4 0M33 33q2 2 4 0M30 38q2 2 4 0" fill="none" stroke="#8a5a00" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="25.5" cy="37" r="2" fill="#ff9fb2"/><circle cx="38.5" cy="37" r="2" fill="#ff9fb2"/>
+  </symbol>
+  <!-- Regnsky -->
+  <symbol id="a-cloud" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#cde8ff"/>
+    <g fill="#fff"><circle cx="23" cy="29" r="9"/><circle cx="33" cy="24" r="11"/><circle cx="43" cy="29" r="8"/><rect x="18" y="28" width="32" height="11" rx="5.5"/></g>
+    <path d="M26 31q2 2 4 0M36 31q2 2 4 0M31 36q2 2 4 0" fill="none" stroke="#5b7fb0" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="23.5" cy="35" r="2" fill="#ffc2d1"/><circle cx="42.5" cy="35" r="2" fill="#ffc2d1"/>
+    <g fill="#6bb8ff"><ellipse cx="23" cy="48" rx="1.8" ry="3"/><ellipse cx="32" cy="52" rx="1.8" ry="3"/><ellipse cx="41" cy="48" rx="1.8" ry="3"/></g>
+  </symbol>
+  <!-- Spilledåse -->
+  <symbol id="a-box" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#ffe6d6"/>
+    <rect x="13" y="30" width="38" height="22" rx="6" fill="#ff9fb2"/>
+    <rect x="11" y="23" width="42" height="10" rx="5" fill="#ffc2d1"/>
+    <path d="M25 40q2.5 2.5 5 0M34 40q2.5 2.5 5 0M29 46q3 2.5 6 0" fill="none" stroke="#8a2c47" stroke-width="1.7" stroke-linecap="round"/>
+    <circle cx="21.5" cy="44" r="2.2" fill="#ff7a99"/><circle cx="42.5" cy="44" r="2.2" fill="#ff7a99"/>
+    <ellipse cx="27" cy="14" rx="3.4" ry="2.5" fill="#7b6cff"/><path d="M30.2 14V6l6 2.2" fill="none" stroke="#7b6cff" stroke-width="1.9" stroke-linecap="round"/>
+    <ellipse cx="42" cy="17" rx="2.6" ry="2" fill="#7b6cff"/><path d="M44.4 17v-6" fill="none" stroke="#7b6cff" stroke-width="1.6" stroke-linecap="round"/>
+  </symbol>
+  <!-- Lille planet -->
+  <symbol id="a-planet" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#d9d3ff"/>
+    <circle cx="32" cy="34" r="14" fill="#b79cff"/>
+    <ellipse cx="32" cy="34" rx="24" ry="6" transform="rotate(-20 32 34)" fill="none" stroke="#ffe08a" stroke-width="3.2"/>
+    <path d="M26 33q2.5 2.5 5 0M33 33q2.5 2.5 5 0M29.5 39q2.5 2 5 0" fill="none" stroke="#43307d" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="24.5" cy="37" r="2" fill="#ffb3d1"/><circle cx="39.5" cy="37" r="2" fill="#ffb3d1"/>
+    <use href="#a-spark" x="8" y="8" width="9" height="9"/><use href="#a-spark" x="49" y="46" width="8" height="8"/><use href="#a-spark" x="48" y="9" width="6" height="6"/>
+  </symbol>
+  <!-- Sovende ugle -->
+  <symbol id="a-owl" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#d6f2d9"/>
+    <path d="M19 26l3-11 8 7zM45 26l-3-11-8 7z" fill="#b98b5e"/>
+    <ellipse cx="32" cy="37" rx="15" ry="16" fill="#b98b5e"/>
+    <ellipse cx="32" cy="42" rx="9.5" ry="10" fill="#f3dfbf"/>
+    <ellipse cx="18" cy="40" rx="4" ry="9" fill="#a07548"/><ellipse cx="46" cy="40" rx="4" ry="9" fill="#a07548"/>
+    <path d="M24 33q3 3 6 0M34 33q3 3 6 0" fill="none" stroke="#3b2a1a" stroke-width="1.9" stroke-linecap="round"/>
+    <path d="M30 36h4l-2 4z" fill="#ffb347"/>
+    <circle cx="23.5" cy="38" r="2.2" fill="#ffb3a1"/><circle cx="40.5" cy="38" r="2.2" fill="#ffb3a1"/>
+    <path d="M28 54l-1 3M32 54v3M36 54l1 3" stroke="#e49a35" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <!-- Stearinlys -->
+  <symbol id="a-candle" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#fff0c9"/>
+    <path d="M32 9q9 10 0 18q-9-8 0-18z" fill="#ffb347"/><path d="M32 16q4 5 0 9q-4-4 0-9z" fill="#ffe08a"/>
+    <rect x="23" y="29" width="18" height="23" rx="4" fill="#fffaf0" stroke="#f0d9a8" stroke-width="1.5"/>
+    <path d="M27 38q2 2 4 0M33 38q2 2 4 0M30 44q2 2 4 0" fill="none" stroke="#8a6a2c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="25.8" cy="42" r="1.9" fill="#ffc2b0"/><circle cx="38.2" cy="42" r="1.9" fill="#ffc2b0"/>
+    <ellipse cx="32" cy="53" rx="15" ry="3.5" fill="#e9b872"/>
+  </symbol>
+  <!-- Sød klokke -->
+  <symbol id="a-bell" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#d4f0ec"/>
+    <path d="M32 14c-9 0-14 7-14 16v8l-4 6h36l-4-6v-8c0-9-5-16-14-16z" fill="#f3c14f"/>
+    <circle cx="32" cy="12.5" r="3" fill="none" stroke="#c9922b" stroke-width="2.2"/>
+    <circle cx="32" cy="49" r="4" fill="#c9922b"/>
+    <path d="M25 31q2.5 2.5 5 0M34 31q2.5 2.5 5 0M29.5 37q2.5 2 5 0" fill="none" stroke="#7a5412" stroke-width="1.7" stroke-linecap="round"/>
+    <circle cx="23.5" cy="35" r="2.2" fill="#ffb3a1"/><circle cx="40.5" cy="35" r="2.2" fill="#ffb3a1"/>
+    <path d="M12 52q4-6 9-4q-2 5-9 4zM52 52q-4-6-9-4q2 5 9 4z" fill="#7fd1a0"/>
+  </symbol>
+  <!-- Palme og sol -->
+  <symbol id="a-palm" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#ffe3c2"/>
+    <circle cx="48" cy="17" r="7" fill="#ffb347"/><path d="M45 17q1.5 1.5 3 0M49 17q1.5 1.5 3 0M46.5 20.5q1.5 1.2 3 0" fill="none" stroke="#a65a00" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M30 56q2-14 7-26" fill="none" stroke="#a9774b" stroke-width="4.5" stroke-linecap="round"/>
+    <g fill="#5cc48b"><path d="M37 29q-14-2-22 7q13-3 22-7z"/><path d="M37 29q-6-12-18-10q10 1 18 10z"/><path d="M37 29q8-11 20-6q-11 0-20 6z"/><path d="M37 29q12 0 17 11q-8-8-17-11z"/></g>
+    <circle cx="35" cy="32" r="2.4" fill="#8a5a2e"/><circle cx="39" cy="33" r="2.4" fill="#8a5a2e"/>
+    <path d="M8 56q10-4 24 0t24 0" fill="none" stroke="#f3c07a" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <!-- Ukulele -->
+  <symbol id="a-uke" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#ffd8d8"/>
+    <g transform="rotate(-28 32 34)">
+      <rect x="29.5" y="3" width="5" height="8" rx="2" fill="#6b4423"/>
+      <rect x="30.2" y="9" width="3.6" height="22" fill="#8a5a2e"/>
+      <ellipse cx="32" cy="29" rx="8.5" ry="7.5" fill="#f0a24b"/>
+      <ellipse cx="32" cy="42" rx="12" ry="11" fill="#f0a24b"/>
+      <path d="M30.8 10v38M32 10v38M33.2 10v38" stroke="#fff" stroke-opacity=".7" stroke-width=".5"/>
+      <path d="M26.5 40q2.2 2.2 4.4 0M33.1 40q2.2 2.2 4.4 0M29.5 46q2.5 2.2 5 0" fill="none" stroke="#6b3a12" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="24.5" cy="44" r="2.1" fill="#ff8fa8"/><circle cx="39.5" cy="44" r="2.1" fill="#ff8fa8"/>
+    </g>
+    <use href="#a-spark" x="7" y="8" width="8" height="8"/><use href="#a-spark" x="50" y="10" width="6" height="6"/><use href="#a-spark" x="49" y="50" width="7" height="7"/>
+  </symbol>
+  <!-- Sovende elefant -->
+  <symbol id="a-elephant" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="32" fill="#e6ddff"/>
+    <circle cx="15" cy="33" r="11" fill="#b4bfee"/><circle cx="49" cy="33" r="11" fill="#b4bfee"/>
+    <circle cx="15" cy="33" r="6" fill="#f6bdd2"/><circle cx="49" cy="33" r="6" fill="#f6bdd2"/>
+    <path d="M32 42v9q0 5-5.5 3.5" fill="none" stroke="#c6d0f6" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="32" cy="33" r="16" fill="#c6d0f6"/>
+    <path d="M23.5 31q2.5 2.5 5 0M35.5 31q2.5 2.5 5 0" fill="none" stroke="#3d4577" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="24" cy="38" r="2.3" fill="#ffb3c8"/><circle cx="40" cy="38" r="2.3" fill="#ffb3c8"/>
+    <use href="#a-spark" x="8" y="8" width="8" height="8"/><use href="#a-spark" x="50" y="8" width="6" height="6"/><use href="#a-spark" x="48" y="52" width="7" height="7"/>
+  </symbol>
+</svg>
+
+<main class="wrap">
+  <header>
+    <div class="scene" aria-hidden="true">
+      <svg class="hero"><use href="#a-moon"/></svg>
+      <svg class="tw a"><use href="#a-spark"/></svg><svg class="tw b"><use href="#a-spark"/></svg><svg class="tw c"><use href="#a-spark"/></svg>
+    </div>
+    <h1>Godnatmusik til de små</h1>
+    <p class="lede">Elleve originale melodier til børn på 3 til 7 år. De er komponeret til siden og spilles direkte her. Tryk på en afspilningsknap og vælg, hvor længe musikken skal spille. Mod slutningen bliver den langsommere og stille, og den slukker af sig selv.</p>
+    <div class="meta">
+      <span class="chip">3–7 år</span>
+      <span class="chip">Ingen reklamer</span>
+      <span class="chip">Slukker selv</span>
+    </div>
+  </header>
+
+  <ol class="list">
+    <li class="row" data-id="vugge" data-title="Månen vugger">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-moon"/></svg>
+        <div><h2>Vuggevise</h2><p class="piece">Månen vugger</p></div>
+      </div>
+      <div class="body">
+        <p>En blid melodi i 3/4-takt, der svinger roligt frem og tilbage som en vugge. Den synges af en blød, rund tone med et stille akkompagnement under. Melodien gentager sig, så barnet hurtigt kender den. Hver anden gang kommer en lille klar tone på som et ekko.</p>
+        <ul class="tags"><li>C-dur</li><li>3/4-takt</li><li>ca. 60 slag/min</li><li>blød sangtone</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="klaver" data-title="Stjerne under dynen">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-star"/></svg>
+        <div><h2>Blød klaver</h2><p class="piece">Stjerne under dynen</p></div>
+      </div>
+      <div class="body">
+        <p>Langsomt klaver med få toner. Venstre hånd gentager et roligt mønster, mens højre hånd synger en kort melodi med god plads imellem. Akkorderne har en let, drømmende klang.</p>
+        <ul class="tags"><li>D-dur, lydisk</li><li>4/4-takt</li><li>ca. 54 slag/min</li><li>klaver</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="regn" data-title="Regn på tagryggen">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-cloud"/></svg>
+        <div><h2>Naturlyde</h2><p class="piece">Regn på tagryggen</p></div>
+      </div>
+      <div class="body">
+        <p>Svag, blød regn og en dyb vind, der svulmer langsomt op og ned. Af og til lyder en kort klokkemelodi i det fjerne. Der er fire forskellige korte melodier, som afløser hinanden. Lyden dækker for huslyde uden at tage opmærksomheden.</p>
+        <ul class="tags"><li>D-pentatonisk</li><li>uden puls</li><li>regn og vind</li><li>fjerne klokker</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="boks" data-title="Lille spilledåse">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-box"/></svg>
+        <div><h2>Spilledåse og harpe</h2><p class="piece">Lille spilledåse</p></div>
+      </div>
+      <div class="body">
+        <p>En klingende spilledåsemelodi i 6/8 med bløde harpeakkorder under. Melodien er kort og let at huske, og den slutter hver gang på en tone, der leder blidt tilbage til starten.</p>
+        <ul class="tags"><li>G-dur</li><li>6/8-takt</li><li>ca. 55 slag/min</li><li>spilledåse og harpe</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="stjerner" data-title="Dybt under stjernerne">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-planet"/></svg>
+        <div><h2>Drømmende ambient</h2><p class="piece">Dybt under stjernerne</p></div>
+      </div>
+      <div class="body">
+        <p>Lange, bløde akkorder, der glider over i hinanden cirka hvert 16. sekund. Ovenpå falder få klokketoner langsomt ned som stjerneskud med et blødt ekko efter sig. Der er ingen rytme, så der er intet at følge med i.</p>
+        <ul class="tags"><li>C-dur</li><li>uden takt</li><li>bløde flader</li><li>klokker med ekko</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="skov" data-title="Skovens sovesang">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-owl"/></svg>
+        <div><h2>Nordisk sovesang</h2><p class="piece">Skovens sovesang</p></div>
+      </div>
+      <div class="body">
+        <p>En rolig melodi i D-dorisk, spillet af en blød fløjte over varme strygere og en dyb, stille tone. Klangen er lidt nordisk og eventyragtig, som en historie om en skov om natten. Små harpetoner løber op under melodien.</p>
+        <ul class="tags"><li>D-dorisk</li><li>4/4-takt</li><li>ca. 60 slag/min</li><li>fløjte og strygere</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="lys" data-title="Aftenlys over søen">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-candle"/></svg>
+        <div><h2>Guitar og nynnen</h2><p class="piece">Aftenlys over søen</p></div>
+      </div>
+      <div class="body">
+        <p>En varm, fingerspillet guitar, der plukker rolige akkorder, og en blød, nynnende melodi ovenpå. Den lyder som en aften ved et stearinlys, hvor alle er trætte og tæt på hinanden. Melodien lander til sidst blidt på grundtonen.</p>
+        <ul class="tags"><li>A-dur</li><li>4/4-takt</li><li>ca. 66 slag/min</li><li>guitar og nynnen</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="klokke" data-title="Templeklokker i haven">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-bell"/></svg>
+        <div><h2>Japansk klokkespil</h2><p class="piece">Templeklokker i haven</p></div>
+      </div>
+      <div class="body">
+        <p>Dybe, bløde templeklokker i en japansk skala med fem toner. Klangen er rund og flad uden skarpe, høje toner, over en meget dyb bundtone og lave koto-toner. Der er god tid mellem klokkeslagene, så musikken fylder rummet uden at presse sig på.</p>
+        <ul class="tags"><li>D-hirajoshi</li><li>4/4-takt</li><li>ca. 50 slag/min</li><li>dybe klokker og koto</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="cuba" data-title="Lille måne over Havana">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-palm"/></svg>
+        <div><h2>Cubansk vuggevise</h2><p class="piece">Lille måne over Havana</p></div>
+      </div>
+      <div class="body">
+        <p>En blød vuggevise i habanera-rytme, som man kender den fra Cuba. Fingerspillet guitar og en dyb, rolig bas bærer rytmen, mens en nynnende melodi i a-mol synger ovenpå. En svag shaker rasler blødt som sand i en kalebas.</p>
+        <ul class="tags"><li>A-mol</li><li>habanera</li><li>ca. 66 slag/min</li><li>guitar og shaker</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="kalimba" data-title="Lille elefant sover">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-elephant"/></svg>
+        <div><h2>Afrikansk kalimba</h2><p class="piece">Lille elefant sover</p></div>
+      </div>
+      <div class="body">
+        <p>En blød kalimba, også kaldet tommelfingerpiano, spiller en kort, gyngende melodi i 12/8. Under melodien plukker en dybere kalimba rolige toner mellem slagene, og en varm bastone holder det hele sammen. Det lyder, som når en stor, tung elefant langsomt vugger sig i søvn.</p>
+        <ul class="tags"><li>C-pentatonisk</li><li>12/8-takt</li><li>ca. 66 slag/min</li><li>kalimba</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+
+    <li class="row" data-id="uke" data-title="Aloha, lille sol">
+      <div class="head">
+        <svg class="art" aria-hidden="true"><use href="#a-uke"/></svg>
+        <div><h2>Blød ukulele</h2><p class="piece">Aloha, lille sol</p></div>
+      </div>
+      <div class="body">
+        <p>En blød, fingerplukket ukulele spiller en let, gyngende melodi, som når solen går stille ned over stranden. De bløde akkorder skifter roligt, og en dyb, varm tone holder dem sammen. Af og til klinger en lille klar tone som et glimt på vandet.</p>
+        <ul class="tags"><li>F-dur</li><li>4/4-takt</li><li>ca. 64 slag/min</li><li>ukulele</li></ul>
+        <button class="play" type="button"><svg class="i-play"><use href="#ico-play"/></svg><svg class="i-pause"><use href="#ico-pause"/></svg><span class="t-play">Spil</span><span class="t-stop">Stop</span></button>
+      </div>
+    </li>
+  </ol>
+
+  <section class="tips">
+    <h2>Til forældre</h2>
+    <ul>
+      <li><strong>Lav lydstyrke</strong><span>Sæt skyderen lavt, så musikken lyder som en hvisken. Placer højttaleren mindst en meter fra barnets hoved.</span></li>
+      <li><strong>Timer</strong><span>Vælg 15 til 60 minutter i afspilleren. Musikken bliver langsommere og stille til sidst.</span></li>
+      <li><strong>Samme melodi hver aften</strong><span>Gentagelse gør musikken til et signal om, at dagen er slut.</span></li>
+      <li><strong>Mørk skærm</strong><span>Tryk på Mørk skærm, så lyser telefonen ikke i rummet. Lad siden være åben, ellers kan telefonen stoppe lyden.</span></li>
+      <li><strong>Hakker lyden?</strong><span>Luk andre apps og faner, brug Mørk skærm, og sæt telefonen til at lade. Lyden laves direkte i telefonen, så det er ikke din forbindelse.</span></li>
+      <li><strong>Prøv først selv</strong><span>Lyt en gang i dagtimerne, og vælg den melodi, barnet bliver roligst af.</span></li>
+    </ul>
+  </section>
+
+  <p class="credit">Lavet af Carsten Lund Pedersen</p>
+</main>
+
+<div class="player" id="player" hidden>
+  <div class="player-in">
+    <div class="np"><b id="now">–</b><span>Slukker om <span id="left">0:00</span></span></div>
+    <div class="ctl">
+      <label for="timer">Slukker efter
+        <select id="timer"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select>
+      </label>
+      <label for="vol">Lyd <input id="vol" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+      <button class="btn" id="dark" type="button">Mørk skærm</button>
+      <button class="btn main" id="stop" type="button">Stop</button>
+    </div>
+  </div>
+</div>
+
+<div id="night" role="button" tabindex="0" hidden>
+  <small id="ntitle"></small>
+  <b id="nleft">0:00</b>
+  <span>Tryk for at vende tilbage</span>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+
+/* ---------- Noder og stemmer ---------- */
+const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const midi = n => { const m = /^([A-G])([#b]?)(\d)$/.exec(n); return 12 * (+m[3] + 1) + SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); };
+const hz = n => 440 * Math.pow(2, (midi(n) - 69) / 12);
+
+let ctx, bus, fade, vol, send, echoIn, pinkBuf, S = null;
+const volVal = () => { const v = +$('#vol').value; return v * v; };
+
+function impulse(sec, decay) {
+  const n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(1, n, ctx.sampleRate);
+  for (let c = 0; c < 1; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay); }
+  return b;
+}
+function pink() {
+  if (pinkBuf) return pinkBuf;
+  const n = ctx.sampleRate * 6; pinkBuf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = pinkBuf.getChannelData(0); let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+  for (let i = 0; i < n; i++) {
+    const w = Math.random() * 2 - 1;
+    b0 = .99886 * b0 + w * .0555179; b1 = .99332 * b1 + w * .0750759; b2 = .969 * b2 + w * .153852;
+    b3 = .8665 * b3 + w * .3104856; b4 = .55 * b4 + w * .5329522; b5 = -.7616 * b5 - w * .016898;
+    d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * .5362) * .11; b6 = w * .115926;
+  }
+  return pinkBuf;
+}
+function ensureAudio() {
+  if (ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'playback' });
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -22; comp.knee.value = 20; comp.ratio.value = 4; comp.attack.value = .03; comp.release.value = .4;
+  vol = ctx.createGain(); fade = ctx.createGain(); bus = ctx.createGain(); send = ctx.createGain(); echoIn = ctx.createGain();
+  const rlp = ctx.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3200;
+  const conv = ctx.createConvolver(); conv.buffer = impulse(2.2, 2.6);
+  bus.connect(fade); bus.connect(send); send.connect(rlp); rlp.connect(conv); conv.connect(fade);
+  const dl = ctx.createDelay(2); dl.delayTime.value = .68;
+  const fb = ctx.createGain(); fb.gain.value = .36;
+  const elp = ctx.createBiquadFilter(); elp.type = 'lowpass'; elp.frequency.value = 1700;
+  bus.connect(echoIn); echoIn.connect(dl); dl.connect(elp); elp.connect(fb); fb.connect(dl); elp.connect(fade);
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 90;
+  const sf = ctx.createBiquadFilter(); sf.type = 'lowpass'; sf.frequency.value = 5200; sf.Q.value = .5;
+  fade.connect(vol); vol.connect(hp); hp.connect(sf); sf.connect(comp); comp.connect(ctx.destination);
+  vol.gain.value = volVal();
+}
+
+const gain = dest => { const g = ctx.createGain(); g.connect(dest); return g; };
+const filt = (type, f, dest, q = .7) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; b.connect(dest); return b; };
+const osc = (type, f, t, end, dest, det = 0) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = det; o.connect(dest); o.start(t); o.stop(end); return o; };
+const hold = (g, t, a, peak, dur, rel) => { const e = Math.max(t + a, t + dur); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setValueAtTime(peak, e); g.gain.setTargetAtTime(0, e, rel); };
+const ping = (g, t, a, peak, tau) => { g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setTargetAtTime(0, t + a, tau); };
+
+const V = {
+  // blød sangtone med svag vibrato
+  sing(d, t, n, dur, v) {
+    const f = hz(n), end = t + dur + 3, g = gain(d), lp = filt('lowpass', Math.min(2400, f * 4), g);
+    const tri = gain(lp); tri.gain.value = .35;
+    const o1 = osc('sine', f, t, end, lp), o2 = osc('triangle', f, t, end, tri, 3);
+    const dep = ctx.createGain(); dep.gain.value = f * .0035; dep.connect(o1.frequency); dep.connect(o2.frequency);
+    osc('sine', 5.1, t, end, dep);
+    hold(g, t, .07, v, dur, .35);
+  },
+  // varm, rund bund og akkorder
+  warm(d, t, n, dur, v) {
+    const g = gain(d), lp = filt('lowpass', 900, g);
+    osc('triangle', hz(n), t, t + dur + 4, lp); hold(g, t, .12, v, dur, .5);
+  },
+  piano(d, t, n, dur, v) {
+    const f = hz(n), m = midi(n), tau = .8 + 1.5 * Math.pow(2, -(m - 48) / 16);
+    const lp = filt('lowpass', Math.min(5000, f * 7), d);
+    [1, .5, .28, .14, .07].forEach((a, k) => {
+      const tk = tau / (1 + .7 * k), pg = gain(lp); ping(pg, t, .01, v * a, tk);
+      osc('sine', f * (k + 1), t, t + tk * 6, pg);
+      if (k === 0) osc('sine', f, t, t + tk * 6, pg, 4);
+    });
+  },
+  box(d, t, n, dur, v) {
+    const f = hz(n);
+    [[1, 1, 1], [2.756, .4, .35], [5.404, .12, .12]].forEach(([r, a, s]) => {
+      const pg = gain(d), tau = 1.0 * s; ping(pg, t, .003, v * a, tau); osc('sine', f * r, t, t + tau * 5, pg);
+    });
+  },
+  harp(d, t, n, dur, v) {
+    const f = hz(n), lp = filt('lowpass', 2400, d);
+    const a = gain(lp); ping(a, t, .004, v, 1.1); osc('triangle', f, t, t + 6, a);
+    const b = gain(lp); ping(b, t, .004, v * .3, .5); osc('sine', f * 2, t, t + 3, b);
+  },
+  pad(d, t, n, dur, v) {
+    const f = hz(n), g = gain(d), lp = filt('lowpass', 800, g, .4);
+    hold(g, t, 5, v, dur, 5);
+    osc('sawtooth', f, t, t + dur + 24, lp, -7); osc('sawtooth', f, t, t + dur + 24, lp, 7);
+  },
+  // luftig fløjte med forsinket vibrato og et strejf af åndedræt
+  flute(d, t, n, dur, v) {
+    const f = hz(n), end = t + dur + 2, g = gain(d), lp = filt('lowpass', Math.min(3200, f * 3.5), g);
+    const o1 = osc('sine', f, t, end, lp);
+    const h = gain(lp); h.gain.value = .14; osc('sine', f * 2, t, end, h);
+    const dep = ctx.createGain(); dep.gain.setValueAtTime(0, t); dep.gain.linearRampToValueAtTime(f * .004, t + Math.min(.7, dur));
+    dep.connect(o1.frequency); osc('sine', 5, t, end, dep);
+    const nz = ctx.createBufferSource(); nz.buffer = pink(); nz.loop = true;
+    const ng = gain(g); ng.gain.value = 3; nz.connect(filt('bandpass', f * 2, ng, 2));
+    nz.start(t, Math.random() * 4); nz.stop(end);
+    hold(g, t, .14, v, dur, .3);
+  },
+  // langsomme, varme strygere
+  strings(d, t, n, dur, v) {
+    const f = hz(n), g = gain(d), lp = filt('lowpass', 1100, g, .3);
+    hold(g, t, 1.3, v, dur, 1.6);
+    [-8, 8].forEach(c => osc('sawtooth', f, t, t + dur + 9, lp, c));
+  },
+  // blød nylonguitar
+  pluck(d, t, n, dur, v) {
+    const f = hz(n), g = gain(d), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = .5; lp.connect(g);
+    lp.frequency.setValueAtTime(Math.min(6000, f * 7), t);
+    lp.frequency.exponentialRampToValueAtTime(Math.max(300, f * 1.6), t + .5);
+    ping(g, t, .004, v, .75);
+    osc('sawtooth', f, t, t + 4.5, lp); osc('triangle', f, t, t + 4.5, lp, 2);
+  },
+  // blød ukulele: kort, rund plukning
+  uke(d, t, n, dur, v) {
+    const f = hz(n), g = gain(d), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = .4; lp.connect(g);
+    lp.frequency.setValueAtTime(Math.min(4200, f * 5), t);
+    lp.frequency.exponentialRampToValueAtTime(Math.max(500, f * 1.8), t + .35);
+    ping(g, t, .005, v, .55);
+    osc('triangle', f, t, t + 3.4, lp); osc('sine', f, t, t + 3.4, lp, 3);
+  },
+  // kalimba: blød, plukket tommelfingerpiano
+  kalimba(d, t, n, dur, v) {
+    const f = hz(n), lp = filt('lowpass', 3500, d);
+    [[1, 1, 1.1], [2, .2, .5], [5.6, .15, .12]].forEach(([r, a, tau]) => {
+      const pg = gain(lp); ping(pg, t, .003, v * a, tau); osc('sine', f * r, t, t + tau * 5, pg);
+    });
+  },
+  // dyb, rund templeklokke uden skarpe toner
+  tempel(d, t, n, dur, v) {
+    const f = hz(n), lp = filt('lowpass', 1500, d);
+    [[1, 1, 3.4], [2, .28, 1.8], [2.4, .12, 1.0], [3, .06, .6]].forEach(([r, a, tau]) => {
+      const pg = gain(lp); ping(pg, t, .012, v * a, tau); osc('sine', f * r, t, t + tau * 5, pg);
+    });
+  },
+  // blød shaker, som sand i en kalebas
+  shaker(d, t, n, dur, v) {
+    const g = gain(d), x = ctx.createBufferSource();
+    x.buffer = pink(); x.connect(filt('highpass', 4500, g));
+    x.start(t, Math.random() * 4); x.stop(t + .3);
+    ping(g, t, .006, v * 5, .035);
+  },
+  bell(d, t, n, dur, v) {
+    const f = hz(n);
+    [[1, 1, 2.4], [2, .2, .9], [3, .06, .5]].forEach(([r, a, tau]) => {
+      const pg = gain(d); ping(pg, t, .015, v * a, tau); osc('sine', f * r, t, t + tau * 5, pg);
+    });
+  }
+};
+
+/* ---------- Kompositioner ---------- */
+const bar = (i, L, list, v, vel) => list.map(([b, d, n]) => ({ b: i * L + b, d, n, v, vel }));
+
+// 1. Månen vugger – C-dur, 3/4
+const VM = [
+  [[0, 1.5, 'E4'], [1.5, .5, 'D4'], [2, 1, 'C4']], [[0, 2, 'D4'], [2, 1, 'E4']],
+  [[0, 1.5, 'A4'], [1.5, .5, 'G4'], [2, 1, 'F4']], [[0, 3, 'G4']],
+  [[0, 1.5, 'A4'], [1.5, .5, 'G4'], [2, 1, 'E4']], [[0, 1.5, 'F4'], [1.5, .5, 'G4'], [2, 1, 'A4']],
+  [[0, 1.5, 'D5'], [1.5, .5, 'B4'], [2, 1, 'G4']], [[0, 1, 'E4'], [1, 2, 'C4']]
+];
+const Cc = ['C3', ['E3', 'G3', 'C4']], Fc = ['F2', ['F3', 'A3', 'C4']], Amc = ['A2', ['E3', 'A3', 'C4']], Gc = ['G2', ['D3', 'G3', 'B3']];
+const VC = [Cc, Cc, Fc, Cc, Amc, Fc, Gc, Cc];
+function buildVugge(pass) {
+  const e = [];
+  VM.forEach((m, i) => {
+    e.push(...bar(i, 3, m, 'sing', .2));
+    const [bs, ch] = VC[i];
+    e.push({ b: i * 3, d: 2.9, n: bs, v: 'warm', vel: .15 });
+    if (pass % 2 === 0) e.push({ b: i * 3 + 1, d: .9, n: ch, v: 'warm', vel: .06 }, { b: i * 3 + 2, d: .9, n: ch, v: 'warm', vel: .05 });
+  });
+  if (pass % 2 === 1) e.push({ b: 10.5, d: 1.5, n: 'G5', v: 'box', vel: .12 }, { b: 22.5, d: 1.5, n: 'C5', v: 'box', vel: .12 });
+  return e;
+}
+
+// 2. Stjerne under dynen – D-dur (lydisk), 4/4
+const PR = [
+  [[0, 2, 'A4'], [2, 1, 'F#5'], [3, 1, 'E5']], [[0, 2, 'D5'], [2, 1, 'B4'], [3, 1, 'A4']],
+  [[0, 1.5, 'B4'], [1.5, .5, 'C#5'], [2, 2, 'D5']], [[0, 2, 'E5'], [2, 1, 'C#5'], [3, 1, 'A4']],
+  [[0, 1, 'A4'], [1, 1, 'D5'], [2, 2, 'F#5']], [[0, 1.5, 'E5'], [1.5, .5, 'C#5'], [2, 2, 'A4']],
+  [[0, 1, 'D5'], [1, 1, 'E5'], [2, 2, 'D5']], [[0, 2, 'C#5'], [2, 2, 'A4']]
+];
+const PL = [['D3', 'A3', 'F#4', 'A3'], ['B2', 'F#3', 'D4', 'F#3'], ['G2', 'D3', 'B3', 'D3'], ['A2', 'E3', 'C#4', 'E3'],
+  ['D3', 'A3', 'F#4', 'A3'], ['F#2', 'C#3', 'A3', 'C#3'], ['G2', 'D3', 'B3', 'D3'], ['A2', 'E3', 'C#4', 'E3']];
+function buildKlaver(pass) {
+  const e = [];
+  PR.forEach((m, i) => {
+    e.push(...bar(i, 4, m, 'piano', .3));
+    PL[i].forEach((n, j) => e.push({ b: i * 4 + j, d: 1, n, v: 'piano', vel: .14 }));
+  });
+  if (pass % 2 === 1) e.push({ b: 15.5, d: 1, n: 'A5', v: 'piano', vel: .1 });
+  return e;
+}
+
+// 4. Lille spilledåse – G-dur, 6/8 (1 slag = 1 ottendedel)
+const BM = [
+  [[0, 3, 'B5'], [3, 1, 'A5'], [4, 2, 'G5']], [[0, 3, 'D6'], [3, 3, 'B5']],
+  [[0, 3, 'E6'], [3, 1, 'D6'], [4, 2, 'B5']], [[0, 3, 'C6'], [3, 1, 'B5'], [4, 2, 'A5']],
+  [[0, 2, 'B5'], [2, 1, 'D6'], [3, 3, 'G6']], [[0, 3, 'F#6'], [3, 1, 'E6'], [4, 2, 'D6']],
+  [[0, 3, 'E6'], [3, 2, 'D6'], [5, 1, 'C6']], [[0, 3, 'B5'], [3, 3, 'A5']]
+];
+const Gh = ['G3', 'D4', 'G4', 'B4'], Emh = ['E3', 'B3', 'E4', 'G4'], Ch = ['C3', 'G3', 'C4', 'E4'], Dh = ['D3', 'A3', 'D4', 'F#4'];
+const BC = [Gh, Gh, Emh, Ch, Gh, Dh, Ch, Dh];
+function buildBoks() {
+  const e = [];
+  BM.forEach((m, i) => {
+    e.push(...bar(i, 6, m, 'box', .34));
+    BC[i].forEach((n, k) => e.push({ b: i * 6 + k * .35, d: 2, n, v: 'harp', vel: .2 }));
+    [2, 3].forEach((k, j) => e.push({ b: i * 6 + 3 + j * .35, d: 2, n: BC[i][k], v: 'harp', vel: .12 }));
+  });
+  return e;
+}
+
+// 5. Dybt under stjernerne – C-dur, 1 slag = 4 sekunder, 16 slag pr. runde
+const AP = [['C3', 'G3', 'D4', 'E4'], ['A2', 'E3', 'B3', 'C4'], ['F2', 'C3', 'A3', 'E4'], ['G2', 'D3', 'A3', 'D4']];
+const AM = [
+  [[.5, 'E5'], [2, 'G5'], [3, 'D5'], [4.5, 'E5'], [6, 'C5'], [7, 'D5'], [8.5, 'A5'], [10, 'G5'], [11, 'E5'], [12.5, 'D5'], [14, 'G5'], [15, 'A5']],
+  [[.75, 'G5'], [2.25, 'E5'], [3.25, 'C5'], [4.75, 'A5'], [6.25, 'E5'], [7.25, 'C5'], [8.75, 'F5'], [10.25, 'A5'], [11.25, 'G5'], [12.75, 'D5'], [14.25, 'A5'], [15.25, 'G5']]
+];
+function buildAmbient(pass) {
+  const e = [];
+  AP.forEach((ch, i) => ch.forEach(n => e.push({ b: i * 4, d: 4.9, n, v: 'pad', vel: .045 })));
+  AM[pass % 2].forEach(([b, n]) => e.push({ b, d: 3, n, v: 'bell', vel: .14 }));
+  return e;
+}
+
+// 6. Skovens sovesang – D-dorisk, 4/4
+const FM = [
+  [[0, 2, 'A4'], [2, 1, 'G4'], [3, 1, 'F4']], [[0, 1.5, 'G4'], [1.5, .5, 'A4'], [2, 2, 'B4']],
+  [[0, 2, 'A4'], [2, 1, 'F4'], [3, 1, 'D4']], [[0, 2, 'E4'], [2, 2, 'G4']],
+  [[0, 1, 'D5'], [1, 1, 'C5'], [2, 2, 'A4']], [[0, 2, 'B4'], [2, 1, 'A4'], [3, 1, 'G4']],
+  [[0, 2, 'C5'], [2, 1, 'B4'], [3, 1, 'A4']], [[0, 2, 'A4'], [2, 2, 'D4']]
+];
+const Dmp = ['D3', 'F3', 'A3'], Gp = ['G2', 'D3', 'B3'], Cp = ['C3', 'E3', 'G3'], Amp = ['A2', 'E3', 'C4'];
+const FP = [Dmp, Gp, Dmp, Cp, Dmp, Gp, Amp, Dmp];
+const Dma = ['D3', 'A3', 'D4'], Ga = ['G3', 'B3', 'D4'], Ca = ['C3', 'G3', 'E4'], Ama = ['A2', 'E3', 'C4'];
+const FA = [Dma, Ga, Dma, Ca, Dma, Ga, Ama, Dma];
+function buildSkov(pass) {
+  const e = [{ b: 0, d: 31.5, n: 'D3', v: 'warm', vel: .1 }];
+  FM.forEach((m, i) => {
+    e.push(...bar(i, 4, m, 'flute', .26));
+    e.push({ b: i * 4, d: 4.3, n: FP[i], v: 'strings', vel: .045 });
+    FA[i].forEach((n, k) => e.push({ b: i * 4 + k, d: 1, n, v: 'harp', vel: .1 }));
+  });
+  if (pass % 2 === 1) e.push({ b: 31, d: 1, n: 'A5', v: 'bell', vel: .1 });
+  return e;
+}
+
+// 7. Aftenlys over søen – A-dur, 4/4
+const GM = [
+  [[0, 1.5, 'C#5'], [1.5, .5, 'B4'], [2, 2, 'A4']], [[0, 2, 'A4'], [2, 1, 'C#5'], [3, 1, 'B4']],
+  [[0, 1.5, 'A4'], [1.5, .5, 'B4'], [2, 2, 'D5']], [[0, 2, 'E5'], [2, 1, 'D5'], [3, 1, 'B4']],
+  [[0, 2, 'C#5'], [2, 1, 'E5'], [3, 1, 'C#5']], [[0, 1.5, 'A4'], [1.5, .5, 'C#5'], [2, 2, 'A4']],
+  [[0, 2, 'D5'], [2, 1, 'B4'], [3, 1, 'A4']], [[0, 1, 'B4'], [1, 1, 'G#4'], [2, 2, 'A4']]
+];
+const Ag = ['A2', 'E3', 'A3', 'C#4'], Fg = ['F#2', 'C#3', 'A3', 'C#4'], Dg = ['D3', 'A3', 'D4', 'F#4'], Eg = ['E2', 'B2', 'E3', 'G#3'];
+const GC = [Ag, Fg, Dg, Eg, Ag, Fg, Dg, Ag];
+function buildGuitar(pass) {
+  const e = [];
+  GM.forEach((m, i) => {
+    e.push(...bar(i, 4, m, 'sing', .16));
+    [0, 1, 2, 3, 2, 1, 2, 1].forEach((x, k) => e.push({ b: i * 4 + k * .5, d: 1, n: GC[i][x], v: 'pluck', vel: .12 }));
+    e.push({ b: i * 4, d: 4.3, n: GC[i].slice(1), v: 'strings', vel: .03 });
+  });
+  if (pass % 2 === 1) e.push({ b: 30, d: 2, n: 'E5', v: 'bell', vel: .08 });
+  return e;
+}
+
+// 8. Templeklokker i haven – D-hirajoshi (D E F A Bb), dyb og rolig, 4/4
+const JM = [
+  [[0, 2, 'D4'], [2, 2, 'A4']], [[0, 1, 'Bb4'], [1, 1, 'A4'], [2, 2, 'F4']],
+  [[0, 2, 'E4'], [2, 1, 'F4'], [3, 1, 'A4']], [[0, 4, 'D4']],
+  [[0, 2, 'A4'], [2, 1, 'Bb4'], [3, 1, 'D5']], [[0, 1, 'A4'], [1, 1, 'F4'], [2, 2, 'E4']],
+  [[0, 2, 'F4'], [2, 2, 'A4']], [[0, 1, 'F4'], [1, 1, 'E4'], [2, 2, 'D4']]
+];
+function buildKlokke(pass) {
+  const e = [{ b: 0, d: 31.5, n: ['D2', 'A2'], v: 'warm', vel: .09 }];
+  JM.forEach((m, i) => {
+    e.push(...bar(i, 4, m, 'tempel', .26));
+    e.push({ b: i * 4, d: 2, n: 'D3', v: 'pluck', vel: .1 }, { b: i * 4 + 2, d: 2, n: 'A2', v: 'pluck', vel: .08 });
+  });
+  if (pass % 2 === 1) e.push({ b: 6.5, d: 2, n: 'D5', v: 'tempel', vel: .1 }, { b: 14.5, d: 2, n: 'F4', v: 'tempel', vel: .1 }, { b: 22.5, d: 2, n: 'A4', v: 'tempel', vel: .1 }, { b: 30, d: 2, n: 'E4', v: 'tempel', vel: .1 });
+  return e;
+}
+
+// 9. Lille måne over Havana – A-mol, habanera-rytme, 4/4 (to habanera-celler pr. takt)
+const CM = [
+  [[0, 1.5, 'E5'], [1.5, .5, 'D5'], [2, 1, 'C5'], [3, 1, 'B4']], [[0, 2, 'A4'], [2, 2, 'C5']],
+  [[0, 1.5, 'D5'], [1.5, .5, 'C5'], [2, 1, 'A4'], [3, 1, 'A4']], [[0, 2, 'G#4'], [2, 2, 'B4']],
+  [[0, 1.5, 'E5'], [1.5, .5, 'D5'], [2, 2, 'C5']], [[0, 2, 'D5'], [2, 1, 'F5'], [3, 1, 'E5']],
+  [[0, 1, 'D5'], [1, 1, 'B4'], [2, 2, 'G#4']], [[0, 1, 'B4'], [1, 1, 'C5'], [2, 2, 'A4']]
+];
+const Amq = ['A2', 'E3', 'A3', 'C4'], Dmq = ['D3', 'A3', 'D4', 'F4'], Eq = ['E2', 'B2', 'E3', 'G#3'];
+const CC = [Amq, Amq, Dmq, Eq, Amq, Dmq, Eq, Amq];
+function buildCuba(pass) {
+  const e = [];
+  CM.forEach((m, i) => {
+    e.push(...bar(i, 4, m, 'sing', .17));
+    const g = CC[i];
+    [0, 2].forEach(c => {
+      const o = i * 4 + c;
+      e.push({ b: o, d: .7, n: g[0], v: 'pluck', vel: .13 }, { b: o + .75, d: .5, n: g[2], v: 'pluck', vel: .09 },
+        { b: o + 1, d: .5, n: g[1], v: 'pluck', vel: .11 }, { b: o + 1.5, d: .5, n: g[3], v: 'pluck', vel: .09 });
+    });
+    e.push({ b: i * 4, d: 1.6, n: g[0], v: 'warm', vel: .12 }, { b: i * 4 + 2, d: 1.6, n: g[1], v: 'warm', vel: .09 });
+    for (let k = 0; k < 8; k++) e.push({ b: i * 4 + k * .5, d: .2, n: 'C4', v: 'shaker', vel: k % 2 ? .02 : .035 });
+  });
+  if (pass % 2 === 1) e.push({ b: 15, d: 1.5, n: 'E5', v: 'bell', vel: .08 });
+  return e;
+}
+
+// 10. Lille elefant sover – C-pentatonisk, 12/8 (1 slag = 1 ottendedel)
+const KM = [
+  [[0, 3, 'E5'], [3, 3, 'D5'], [6, 3, 'C5'], [9, 3, 'D5']], [[0, 3, 'E5'], [3, 3, 'G5'], [6, 6, 'E5']],
+  [[0, 3, 'D5'], [3, 3, 'C5'], [6, 3, 'A4'], [9, 3, 'C5']], [[0, 6, 'D5'], [6, 6, 'G4']],
+  [[0, 3, 'G5'], [3, 3, 'E5'], [6, 3, 'D5'], [9, 3, 'E5']], [[0, 3, 'G5'], [3, 3, 'A5'], [6, 3, 'G5'], [9, 3, 'E5']],
+  [[0, 3, 'D5'], [3, 3, 'E5'], [6, 3, 'D5'], [9, 3, 'C5']], [[0, 3, 'D5'], [3, 3, 'A4'], [6, 6, 'C5']]
+];
+const Kc = ['C3', ['C4', 'G4']], Ka = ['A2', ['A3', 'E4']], Kg = ['G2', ['G3', 'D4']];
+const KC = [Kc, Kc, Ka, Kg, Kc, Kc, Kg, Kc];
+function buildKalimba(pass) {
+  const e = [];
+  KM.forEach((m, i) => {
+    e.push(...bar(i, 12, m, 'kalimba', .2));
+    const [bs, ch] = KC[i];
+    e.push({ b: i * 12, d: 11, n: bs, v: 'warm', vel: .1 });
+    [0, 3, 6, 9].forEach((o, k) => e.push({ b: i * 12 + o + 1.5, d: 1, n: ch[k % 2], v: 'kalimba', vel: .08 }));
+  });
+  if (pass % 2 === 1) e.push({ b: 21, d: 2, n: 'C6', v: 'bell', vel: .08 }, { b: 93, d: 2, n: 'G5', v: 'bell', vel: .08 });
+  return e;
+}
+
+// 11. Aloha, lille sol – F-dur, 4/4, fingerplukket ukulele
+const UM = [
+  [[0, 1.5, 'A4'], [1.5, .5, 'G4'], [2, 1, 'F4'], [3, 1, 'A4']], [[0, 2, 'D5'], [2, 1, 'C5'], [3, 1, 'A4']],
+  [[0, 1.5, 'Bb4'], [1.5, .5, 'A4'], [2, 2, 'F4']], [[0, 2, 'G4'], [2, 1, 'E4'], [3, 1, 'G4']],
+  [[0, 1.5, 'A4'], [1.5, .5, 'C5'], [2, 2, 'F5']], [[0, 2, 'D5'], [2, 1, 'C5'], [3, 1, 'A4']],
+  [[0, 1.5, 'Bb4'], [1.5, .5, 'C5'], [2, 1, 'D5'], [3, 1, 'C5']], [[0, 2, 'A4'], [2, 2, 'F4']]
+];
+const Uf = ['F3', ['A3', 'C4', 'F4', 'A4']], Ud = ['D3', ['A3', 'D4', 'F4', 'A4']], Ub = ['Bb2', ['Bb3', 'D4', 'F4', 'Bb4']], Uc = ['C3', ['G3', 'C4', 'E4', 'G4']];
+const UC = [Uf, Ud, Ub, Uc, Uf, Ud, Ub, Uf];
+function buildUke(pass) {
+  const e = [];
+  UM.forEach((m, i) => {
+    e.push(...bar(i, 4, m, 'uke', .2));
+    const [bs, ch] = UC[i];
+    e.push({ b: i * 4, d: 3.8, n: bs, v: 'warm', vel: .08 });
+    [0, 1, 2, 1, 3, 1, 2, 1].forEach((x, k) => e.push({ b: i * 4 + k * .5, d: 1, n: ch[x], v: 'uke', vel: .08 }));
+  });
+  if (pass % 2 === 1) e.push({ b: 14, d: 2, n: 'F5', v: 'bell', vel: .07 }, { b: 30, d: 2, n: 'C5', v: 'bell', vel: .07 });
+  return e;
+}
+
+// 3. Regn på tagryggen – blød regn, vind og klokkemotiver i D-pentatonisk
+const MOTIFS = [['A5', 'F#5', 'E5', 'D5'], ['D5', 'E5', 'F#5', 'A5', 'F#5'], ['B5', 'A5', 'F#5', 'E5', 'F#5', 'D5'], ['F#5', 'A5', 'B5', 'A5']];
+function drop(d, t) {
+  const p = ctx.createStereoPanner(); p.pan.value = Math.random() * 1.6 - .8; p.connect(d);
+  const g = gain(p); ping(g, t, .002, .008 + Math.random() * .014, .012);
+  osc('sine', 1800 + Math.random() * 2800, t, t + .15, g);
+}
+function runNature(s) {
+  const tg = s.tg, buf = pink(), now = ctx.currentTime;
+  const mk = () => { const x = ctx.createBufferSource(); x.buffer = buf; x.loop = true; x.start(0, Math.random() * 5); s.stops.push(() => x.stop(ctx.currentTime + 1)); return x; };
+  const rg = gain(tg); rg.gain.value = .24;
+  mk().connect(filt('highpass', 800, filt('lowpass', 3600, rg)));
+  const wg = gain(tg); wg.gain.value = .3;
+  mk().connect(filt('lowpass', 380, wg));
+  const lfo = ctx.createOscillator(); lfo.frequency.value = .07; const la = ctx.createGain(); la.gain.value = .2;
+  lfo.connect(la); la.connect(wg.gain); lfo.start(); s.stops.push(() => lfo.stop(ctx.currentTime + 1));
+  let nd = now + .2, nc = now + 5, ci = 0;
+  const step = () => {
+    const t = ctx.currentTime;
+    while (nd < t + 2) { drop(tg, nd); nd += .12 + Math.random() * .5; }
+    if (nc < t + 1.5) {
+      const m = tempoMul();
+      MOTIFS[ci++ % MOTIFS.length].forEach((n, i) => V.bell(tg, nc + i * .95 * m, n, 2, .1));
+      nc += (13 + Math.random() * 5) * m;
+    }
+  };
+  step(); s.timers.push(setInterval(step, 200));
+}
+
+function runPattern(s) {
+  const T = s.T; let pass = 0, next = ctx.currentTime + .4, q = [];
+  const fill = () => {
+    const beat = 60 / T.bpm * tempoMul();
+    q = T.build(pass).map(e => ({ ...e, t: next + e.b * beat, d: e.d * beat })).sort((a, b) => a.t - b.t);
+    next += T.length * beat; pass++;
+  };
+  const step = () => {
+    const lim = ctx.currentTime + 3;
+    while (true) {
+      while (q.length && q[0].t < lim) { const e = q.shift(); for (const n of [].concat(e.n)) V[e.v](s.tg, e.t, n, e.d, e.vel); }
+      if (q.length || next >= lim) break;
+      fill();
+    }
+  };
+  step(); s.timers.push(setInterval(step, 250));
+}
+
+const TRACKS = [
+  { id: 'vugge', title: 'Månen vugger', bpm: 60, length: 24, build: buildVugge, gain: .45, wet: .35, echo: 0 },
+  { id: 'klaver', title: 'Stjerne under dynen', bpm: 54, length: 32, build: buildKlaver, gain: .33, wet: .4, echo: 0 },
+  { id: 'regn', title: 'Regn på tagryggen', run: runNature, gain: .8, wet: .5, echo: .25 },
+  { id: 'boks', title: 'Lille spilledåse', bpm: 166, length: 48, build: buildBoks, gain: .35, wet: .4, echo: .1 },
+  { id: 'stjerner', title: 'Dybt under stjernerne', bpm: 15, length: 16, build: buildAmbient, gain: 1, wet: .7, echo: .5 },
+  { id: 'skov', title: 'Skovens sovesang', bpm: 60, length: 32, build: buildSkov, gain: .4, wet: .55, echo: .12 },
+  { id: 'lys', title: 'Aftenlys over søen', bpm: 66, length: 32, build: buildGuitar, gain: .48, wet: .4, echo: .08 },
+  { id: 'klokke', title: 'Templeklokker i haven', bpm: 50, length: 32, build: buildKlokke, gain: .33, wet: .6, echo: .2 },
+  { id: 'cuba', title: 'Lille måne over Havana', bpm: 66, length: 32, build: buildCuba, gain: .45, wet: .35, echo: .05 },
+  { id: 'kalimba', title: 'Lille elefant sover', bpm: 200, length: 96, build: buildKalimba, gain: .58, wet: .4, echo: .1 },
+  { id: 'uke', title: 'Aloha, lille sol', bpm: 64, length: 32, build: buildUke, gain: .56, wet: .4, echo: .08 }
+];
+
+/* ---------- Afspilning, timer og udtoning ---------- */
+const tempoMul = () => S ? 1 + .16 * Math.min(1, (ctx.currentTime - S.t0) / S.total) : 1;
+const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
+function armFade(ramp, from) {
+  const now = ctx.currentTime, end = S.t0 + S.total, fs = Math.max(now + ramp, end - 60);
+  fade.gain.cancelScheduledValues(now);
+  fade.gain.setValueAtTime(from, now);
+  fade.gain.linearRampToValueAtTime(1, now + ramp);
+  fade.gain.setValueAtTime(1, fs);
+  fade.gain.exponentialRampToValueAtTime(.001, end);
+}
+
+function start(id) {
+  ensureAudio();
+  if (ctx.state === 'suspended') ctx.resume();
+  stop();
+  const T = TRACKS.find(x => x.id === id), now = ctx.currentTime;
+  const tg = ctx.createGain(); tg.gain.value = T.gain; tg.connect(bus);
+  send.gain.cancelScheduledValues(now); send.gain.setValueAtTime(T.wet, now);
+  echoIn.gain.cancelScheduledValues(now); echoIn.gain.setValueAtTime(T.echo, now);
+  S = { id, T, tg, t0: now, total: +$('#timer').value * 60, timers: [], stops: [] };
+  armFade(3, .0001);
+  (T.run || runPattern)(S);
+  S.timers.push(setInterval(tick, 500));
+  lock(); tick(); ui();
+}
+
+function stop() {
+  if (!S) return;
+  const s = S; S = null;
+  s.timers.forEach(clearInterval);
+  s.stops.forEach(f => { try { f(); } catch (e) {} });
+  const now = ctx.currentTime;
+  s.tg.gain.cancelScheduledValues(now); s.tg.gain.setValueAtTime(s.tg.gain.value, now); s.tg.gain.setTargetAtTime(0, now, .15);
+  setTimeout(() => { try { s.tg.disconnect(); } catch (e) {} }, 1500);
+  unlock(); $('#night').hidden = true; ui();
+}
+
+function tick() {
+  if (!S) return;
+  const left = S.t0 + S.total - ctx.currentTime;
+  $('#left').textContent = $('#nleft').textContent = fmt(left);
+  if (left <= 0) stop();
+}
+
+let wl = null;
+async function lock() { try { wl = await navigator.wakeLock.request('screen'); } catch (e) {} }
+function unlock() { try { wl && wl.release(); } catch (e) {} wl = null; }
+document.addEventListener('visibilitychange', () => { if (S && document.visibilityState === 'visible') lock(); });
+
+/* ---------- Brugerflade ---------- */
+const rows = [...document.querySelectorAll('.row')];
+function ui() {
+  rows.forEach(r => {
+    const on = !!S && S.id === r.dataset.id, b = $('.play', r);
+    r.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-label', (on ? 'Stop ' : 'Spil ') + r.dataset.title);
+  });
+  $('#player').hidden = !S;
+  if (S) $('#now').textContent = $('#ntitle').textContent = S.T.title;
+}
+rows.forEach(r => $('.play', r).addEventListener('click', () => (S && S.id === r.dataset.id) ? stop() : start(r.dataset.id)));
+$('#stop').addEventListener('click', stop);
+$('#vol').addEventListener('input', () => { if (ctx) vol.gain.setTargetAtTime(volVal(), ctx.currentTime, .05); });
+$('#timer').addEventListener('change', () => {
+  if (!S) return;
+  S.total = (ctx.currentTime - S.t0) + +$('#timer').value * 60;
+  armFade(.5, fade.gain.value); tick();
+});
+$('#dark').addEventListener('click', () => { $('#night').hidden = false; });
+const closeNight = () => { $('#night').hidden = true; };
+$('#night').addEventListener('click', closeNight);
+$('#night').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') closeNight(); });
+ui();
+})();
+</script>
+</body>
+</html>
